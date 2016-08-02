@@ -135,5 +135,16 @@ return {
     down = [[
       ALTER TABLE nodes WITH default_time_to_live = 3600;
     ]]
+  },
+  {
+    name = "2016-08-03-321564_api_header_matching",
+    up = [[
+      ALTER TABLE apis ADD request_header_name text;
+      ALTER TABLE apis ADD request_header_pattern text;
+    ]],
+    down = [[
+      ALTER TABLE apis DROP request_header_name text;
+      ALTER TABLE apis DROP request_header_pattern text;
+    ]]
   }
 }

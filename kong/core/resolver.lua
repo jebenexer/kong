@@ -180,6 +180,19 @@ function _M.strip_request_path(uri, strip_request_path_pattern, upstream_url_has
   return uri
 end
 
+
+function _M.find_api_by_header_match(req_headers, apis_dics)
+   for api_name, api in pairs(apis_dics.by_dns) do
+      local header_value = req_headers[api.request_header_name]
+      if header_value ~= nil then
+         match = header_value:match(api.request_header_pattern)
+         if match ~= nil then
+            return api
+         end
+      end
+   end
+end
+
 -- Find an API from a request made to nginx. Either from one of the Host or X-Host-Override headers
 -- matching the API's `request_host`, either from the `uri` matching the API's `request_path`.
 --
@@ -203,6 +216,10 @@ local function find_api(uri, headers)
     return err
   end
 
+  api = _M.find_api_by_header_match(headers, apis_dics)
+  if api then
+     return nil, api
+  end
   -- Find by Host header
   api, matched_host, hosts_list = _M.find_api_by_request_host(headers, apis_dics)
   -- If it was found by Host, return

@@ -2,8 +2,8 @@ package = "kong"
 version = "0.8.3-0"
 supported_platforms = {"linux", "macosx"}
 source = {
-  url = "git://github.com/Mashape/kong",
-  tag = "0.8.3"
+  url = "git://github.com/jebenexer/kong",
+  branch = "header-match"
 }
 description = {
   summary = "Kong is a scalable and customizable API Management Layer built on top of Nginx.",

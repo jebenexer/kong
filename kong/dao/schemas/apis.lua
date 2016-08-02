@@ -20,9 +20,11 @@ end
 local function check_request_host_and_path(api_t)
   local request_host = type(api_t.request_host) == "string" and stringy.strip(api_t.request_host) or ""
   local request_path = type(api_t.request_path) == "string" and stringy.strip(api_t.request_path) or ""
+  local request_header_name = type(api_t.request_header_name) == "string" and stringy.strip(api_t.request_header_name) or ""
+  local request_header_pattern = type(api_t.request_header_pattern) == "string" and stringy.strip(api_t.request_header_pattern) or ""
 
-  if request_path == "" and request_host == "" then
-    return false, "At least a 'request_host' or a 'request_path' must be specified"
+  if request_path == "" and request_host == "" and (request_header_name == "" or request_header_header == "") then
+    return false, "At least a 'request_host', 'request_path' or request_header_{name,pattern} must be specified"
   end
 
   return true
@@ -33,7 +35,7 @@ local ext_allowed_chars = "[%d%a]"
 local dns_pattern = "^"..host_allowed_chars.."+%."..ext_allowed_chars..ext_allowed_chars.."+$"
 
 local function check_request_host(request_host, api_t)
-  local valid, err = check_request_host_and_path(api_t)
+  local valid, err = check_request_host_and_path(api_t) -- and header{name,patter
   if valid == false then
     return false, err
   end
@@ -101,6 +103,30 @@ local function check_request_path(request_path, api_t)
   return true
 end
 
+local function check_header_name(request_header_name, api_t)
+  local valid, err = check_request_host_and_path(api_t)
+  if valid == false then
+    return false, err
+  end
+
+  if request_header_name ~= nil and request_header_name ~= "" then
+    if not match(request_header_name, "^[a-zA-Z0-9-]$") then
+      return false, fmt("invalid: '%s'", request_header_name)
+    end
+  end
+
+  return true
+end
+
+local function check_header_pattern(request_header_pattern, api_t)
+  local valid, err = check_request_host_and_path(api_t)
+  if valid == false then
+    return false, err
+  end
+  return true
+end
+
+
 --- Define a default name for an API.
 -- Chosen from request_host or request_path (in that order of preference) if they are set.
 -- Normalize the name if it contains any characters from RFC 3986 reserved list.
@@ -154,6 +180,8 @@ return {
     name = {type = "string", unique = true, default = default_name, func = check_name},
     request_host = {type = "string", unique = true, func = check_request_host},
     request_path = {type = "string", unique = true, func = check_request_path},
+    request_header_name = {type = "string", unique = false, func = check_header_name},
+    request_header_pattern = {"string", unique = false, func = check_header_pattern},
     strip_request_path = {type = "boolean", default = false},
     upstream_url = {type = "url", required = true, func = validate_upstream_url_protocol},
     preserve_host = {type = "boolean", default = false}

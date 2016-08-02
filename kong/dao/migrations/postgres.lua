@@ -141,5 +141,18 @@ return {
       DROP TABLE ttls;
       DROP FUNCTION upsert_ttl(text, uuid, text, text, timestamp);
     ]]
+  },
+  {
+    name = "2016-08-03-312356_api_header_matching",
+    up = [[
+      ALTER TABLE apis
+        ADD COLUMN request_header_name text,
+        ADD COLUMN request_header_pattern text;
+    ]],
+    down = [[
+      ALTER TABLE apis
+        DROP COLUMN request_header_name,
+        DROP COLUMN request_header_pattern;
+    ]]
   }
 }
